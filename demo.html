@@ -1,17 +1,42 @@
 <!doctype html>
 <style>
-    @font-face {
+    @font-face
+    {
         font-family: "Web IBM VGA 8x16";
         src: url("./demo/web_ibm_vga_8x16.woff") format("woff");
     }
 
-    .emu_text
+    #screen_container
+    {
+        border: 2px solid #aaa;
+        padding: 20px;
+        margin: auto;
+        width: 800px;
+    }
+
+    #emu_text
     {
         white-space: pre;
         font-family: "Web IBM VGA 8x16";
         font-style: normal;
         font-size: 20px;
         line-height: 20px;
+    }
+
+    #emu_screen
+    {
+        display: none;
+    }
+
+    #hint_text
+    {
+        text-align: center;
+        line-height: 20px;
+    }
+
+    body
+    {
+        min-width: 880px;
     }
 </style>
 <script src="./demo/libv86.js"></script>
@@ -41,27 +66,28 @@ window.onload = function()
 <h2>Online Demo</h2>
 <hr>
 <div id="screen_container">
-    <div class="emu_text"></div>
-    <canvas style="display: none"></canvas>
+    <div id="emu_text"></div>
+    <canvas id="emu_screen"></canvas>
+    <p id="hint_text">
+        <b>Press Alt+F1/F2/F3 to switch terminal. Press Ctrl+C to interrupt. Press Ctrl+H to get help.<br>
+        Press Ctrl+S to enable/disable scheduler, so it can mimic the environment prior to CP5.</b><br><br>
+        For more combinational keys and technical info, please refer to the <a href="./overview.html" target="_blank">Technical Overview</a> page.<br>
+        This page is best viewed on a computer. Refresh the page to reset the emulator.<br>
+    </p>
 </div>
-<p>
-    Press Alt+F1/F2/F3 to switch terminal. Press Ctrl+C to interrupt. Press Ctrl+H to get help.<br>
-    Press Ctrl+S to enable/disable scheduler, so it can mimic the environment prior to CP5.<br>
-</p>
-<p>
-    For more combinational keys, hints, and technical info, please refer to the <a href="./overview.html" target="_blank">Technical Overview</a> page.<br>
-    This page is best viewed on a computer. Refresh the page to reset the emulator.<br>
-</p>
 <h3>Introduction</h3>
 <p>
     <b>391OS-36 is a x86 multitask OS built from scratch.</b> It features:<br>
-    <li>A custom file system</li>
-    <li>Essential drivers and system calls</li>
-    <li>Up to six user applications running in three terminals</li>
-    <li>Scheduler, VRTC, and signals support</li>
+    <ul>
+        <li>A custom file system</li>
+        <li>Essential drivers and system calls</li>
+        <li>Up to six user applications running in three terminals</li>
+        <li>Scheduler, VRTC, and signals support</li>
+    </ul>
 </p>
 <h3>Office Hours</h3>
 <p>
     I am hosting office hours for ECE 391 in Spring 2023.<br>
     If you ever need help please come by 19-22 W or 18-22 F in ECEB 3026.<br>
 </p>
+<hr>
