@@ -47,7 +47,7 @@
     </p>
 </div>
 <p>
-    <b>Note:</b> All <i>italic</i> words in this document are design specific and not required for your MP3.<br>
+    <b>Note:</b> All <i>italic</i> words in this document are for extra credits or design specific and not required for your MP3.<br>
 </p>
 <h3 id="cmd">Shell Commands</h3>
 <table border="2" cellpadding="5">
@@ -57,7 +57,7 @@
     </tr>
     <tr>
         <td>exit</td>
-        <td>Quit the current 391OS-36 Shell program.<br>Will try to restart if the last shell in the current terminal is terminating.</td>
+        <td>Quit the current 391OS-36 Shell program.<br>Will try to restart if the last shell in the current terminal is terminated.</td>
     </tr>
     <tr>
         <td>[Executable] [Arg]</td>
@@ -174,7 +174,7 @@
     <tr>
         <td>cat</td>
         <td>Executable</td>
-        <td>Argument: a file name. Print any file to the current terminal.</td>
+        <td>Argument: a file name. Try to open and read the content of a file/directory/device.</td>
     </tr>  
     <tr>
         <td>frame0.txt</td>
@@ -212,7 +212,7 @@
         <td>Used to test the terminal driver (input buffer).</td>
     </tr>  
 </table>
-<h3 id="linkage">Traps/Assembly Linkages</h3>
+<h3 id="linkage">Assembly Linkages</h3>
 <p>
     Whenever there is a trap, processor jumps to the assmebly linkage from the IDT.<br>
     Assembly linkages for interruption, exception, and system calls are different, but they all construct a hardware context for furture restoring or usage.<br>
@@ -345,6 +345,9 @@
 </p>
 <i>
     <h3 id="sig">Signals</h3>
+    <p>
+        Please note that signals are for extra credit; they are not required.
+    </p>
     <table border="2" cellpadding="5">
         <tr>
             <th bgcolor="#ccffff">Signal</th>
@@ -384,8 +387,8 @@
     </table>
     <p>
         The first five signals supports a custom user-installed handler through set_handler system call.<br>
-        Linkage is carefully engineered to construct the stack, so signals are checked and delivered during any context switch (see above).<br>
-        Please note that signals are for extra credit; they are not required.<br>
+        You will need to implement the first five to be eligible to receive extra credit for the signals in your MP assignment.<br>
+        Linkage is carefully engineered to construct the stack, so signals are checked and delivered during any context switch (see above).
     </p>
 </i>
 <i>
@@ -403,8 +406,8 @@
             <li>COOR, the cursor coordination</li>
             <li>... and also, the (active, for terminal) program name</li>
         </ul>
-        It is highly design specific so it is definiately not required.<br>
-        Please note this utility's kill function does not work the scheduler.<br>
+        It is design specific to 391OS-36, so it is definiately not required.<br>
+        Please note this utility's kill function does not work the scheduler (please check other known issues in the demo page).<br>
     </p>
 </i>
 <hr>
