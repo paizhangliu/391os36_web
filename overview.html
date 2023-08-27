@@ -38,9 +38,9 @@
             <li><a href="#pmem">Physical Memory Layout</a></li>
             <li><a href="#vmem">Virtual Memory Layout</a></li>
             <li><a href="#syscall">System Calls</a></li>
-            <li><a href="#proctrl">Process Control</a></li>
-            <li><a href="#scheduler">Scheduler</a></li>
-            <li><a href="#multerm">Multiterminals</a></li>
+            <li><a href="#proctrl">Process Control/Execute/Halt</a></li>
+            <li><a href="#scheduler">Process Switching/Scheduler</a></li>
+            <li><a href="#multerm">Background Switching/Multiterminals</a></li>
             <li><a href="#sig">Signals</a></li>
             <li><a href="#pmgr">Process Manager</a></li>
         </ul>
@@ -61,7 +61,7 @@
     </tr>
     <tr>
         <td>[Executable] [Arg]</td>
-        <td>Search and open the program in the current terminal.<br>Some program may require additional arguments (see below).</td>
+        <td>Search and open the program in the current terminal.<br>Some program may require additional arguments (see <a href="#fsdir">File System Directory</a>).</td>
     </tr>
 </table>
 <h3 id="combkey">Combinational Keys</h3>
@@ -74,17 +74,17 @@
     <tr>
         <td>Alt+F1</td>
         <td>Switch to Terminal 1</td>
-        <td>(See below)</td>
+        <td>(See <a href="#multerm">Background Switching/Multiterminals</a>)</td>
     </tr>
    <tr>
         <td>Alt+F2</td>
         <td>Switch to Terminal 2</td>
-        <td>(See below)</td>
+        <td>(See <a href="#multerm">Background Switching/Multiterminals</a>)</td>
     </tr> 
     <tr>
         <td>Alt+F3</td>
         <td>Switch to Terminal 3</td>
-        <td>(See below)</td>
+        <td>(See <a href="#multerm">Background Switching/Multiterminals</a>)</td>
     </tr>
     <tr>
         <td>Ctrl+C</td>
@@ -99,17 +99,17 @@
     <tr>
         <td><i>Ctrl+S</i></td>
         <td><i>Enable/Disable Scheduler</i></td>
-        <td><i>(See below)</i></td>
+        <td><i>(See <a href="#scheduler">Process Switching/Scheduler</a>)</i></td>
     </tr>  
     <tr>
         <td><i>Ctrl+V</i></td>
         <td><i>Enable/Disable Verbose Mode</i></td>
-        <td><i>Print the verbose outputs (for debug only).</i></td>
+        <td><i>Print the verbose outputs (for debugging only).</i></td>
     </tr>  
     <tr>
         <td><i>Ctrl+P</i></td>
         <td><i>Start 391OS-36 Process Manager</i></td>
-        <td><i>(See below)</i></td>
+        <td><i>(See <a href="#pmgr">Process Manager</a>)</i></td>
     </tr>  
     <tr>
         <td><i>Ctrl+H</i></td>
@@ -125,8 +125,8 @@
 </p>
 <h3 id="fsabst">File System Abstraction</h3>
 <p>
-    The 391OS-36 treat any files, device (RTC), and directory as files (see above). Each process has a dynamic File Descriptor (FD) that supports 8 open files.<br>
-    Each FD entry tracks inode, position, flags, and an operation jump table, according to the file type. They are directly utilized by system calls (see below).<br>
+    The 391OS-36 treat any files, device (RTC), and directory as files (see <a href="#fsdir">File System Directory</a>). Each process has a dynamic File Descriptor (FD) that supports 8 open files.<br>
+    Each FD entry tracks inode, position, flags, and an operation jump table, according to the file type. They are directly utilized by system calls (see <a href="#syscall">System Calls</a>).<br>
 </p>
 <h3 id="fsdir">File System Directory</h3>
 <table border="2" cellpadding="5">
@@ -229,31 +229,31 @@
 </p>
 <h3 id="linkage">Context Switch/Assembly Linkages</h3>
 <p>
-    Whenever an interruption, exception, or system call happened, the processor jumps to a specific assmebly linkage from the IDT.<br>
+    Whenever an interruption, exception, or system call happened, the processor jumps to a specific assmebly linkage in the kernel space.<br>
     This procedure is sometimes called a <b>"context switch"</b>. It is almost constantly happening with the scheduler enabled, as the OS schedules the next program.<br>
-    Assembly linkages for interruption, exception, and system calls are different, but they all construct a hardware context for furture restoring or usage.<br>
-    They will also push/pass through arguments accordingly, and call the corresponding handlers (see below).<br>
-    When returning back from the handler, assembly linkage will resume the hardware context saved before by IRET.<br>
-    Or, halt/execute/process switch (see below) constructs a custom context, then it will jump to a new or background program's Prgram Counter (PC) and stack.<br>
-    <i>When going back to the user space, it will also dispatches any pending signal (see below, optional).</i><br>
+    Assembly linkages for interruption, exception, and system calls are different, but they all construct a hardware context on the kernel stack for restoring or usage.<br>
+    They will also push/pass through arguments accordingly, and call the corresponding handlers (see <a href="#exception">Exception Handlers</a>, <a href="#int">Interrupt Handlers</a>, and <a href="#syscall">System Calls</a>).<br>
+    When returning back from the handler, assembly linkage will resume the hardware context saved before by IRET, then go back to the user space.<br>
+    Or, halt/execute/process switch (see <a href="#proctrl">Execute/Halt</a> and <a href="#scheduler">Switch</a>) constructs a custom context, then it will jump to the next program's Prgram Counter (PC) and stack.<br>
+    <i>When going back to the user space, it will also dispatches any pending signal (see <a href="#sig">Signals</a>, this is optional).</i><br>
     <i>Now, you see the reason why context switch is <b>expensive</b>. The assembly linkage really needs to deal with a lot of stuff.</i>
 </p>
 <h3 id="exception">Exception/Exception Handlers</h3>
 <p>
-    An exception happens when the user program did something wild, such as dividing by zero or accessing illegal pages (see below).<br>
-    Exceptions are synchronised. When an exception was generated, the processor jumps to the specific assembly linkage (see ablve).<br>
+    An exception happens when the user program did something wild, such as dividing by zero or accessing illegal pages.<br>
+    Exceptions are synchronised. When an exception was generated, the processor jumps to the specific assembly linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
     The exception assembly linkage pushes information and calls an unified exception handler.<br>
-    Then, the handler will display the error message, debug information, and <i>send a signal to the process for further handling (see below)</i>.<br>
-    If you did not implement the signal or no handler was installed, the default behavior is usually killing the offending program.
+    Then, the handler will display the error message, debug information, and <i>send a signal to the process for further handling (see <a href="#sig">Signals</a>, this is optional)</i>.<br>
+    If you did not implement the signal or no handler was installed, the default behavior is usually killing/halting the offending program.
 </p>
 <h3 id="int">Interrupt/Interrupt Handlers</h3>
 <p>
     An interrupt happens when a piece of hardware needs processor's attention, such as keyboard input, RTC, and PIC.<br>
-    391OS-36 only contains essential drivers (see below). Interrupt lines (IRQs) from non-supported hardware are masked and ignored.<br>
-    The IRQ lines are managed by two i8259 PICs just like any other classic IBM-compatible PC.<br>
-    Interrupts are non-synchronised. When an interrupt is raised and got processor's attention, it jumps to the specific assembly linkage (see above).<br>
+    The 391OS-36 only contains essential drivers (see <a href="#dev">Supported Devices/Drivers</a>). Interrupt lines (IRQs) from non-supported hardware are masked and ignored.<br>
+    The IRQ lines are managed by two i8259 PICs just like any other mainstream IBM-compatible PC.<br>
+    Interrupts are non-synchronised. When an interrupt is raised and got processor's attention, it jumps to the specific assembly linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
     The interrupt assmebly linkage pushes information and calls an unified interrupt handler.<br>
-    Then, the handler will call the corresponding driver, and the driver will handle the remaining work (again, see below).
+    Then, the handler will call the corresponding driver, and the driver will handle the remaining work (again, see <a href="#dev">Supported Devices/Drivers</a>).
 </p>
 <table border="2" cellpadding="5">
     <tr>
@@ -275,7 +275,7 @@
         <td>YES</td>
     </tr> 
     <tr>
-        <td>System Calls (see below)</td>
+        <td>System Calls (see <a href="#syscall">System Calls</a>)</td>
         <td>User program, deliberately via INT x80</td>
         <td>NO</td>
         <td>NO</td>
@@ -284,37 +284,37 @@
 <h3 id="dev">Supported Devices/Drivers</h3>
 <p>
     The 391OS-36 has drivers for the standard keyboard, Programmable Interval Timer (PIT), Real-Time Clock (RTC), and terminal.<br>
-    Keyboard, PIT, and RTC drivers are for real devices and contains handlers for their interruptions (see above).<br>
+    Keyboard, PIT, and RTC drivers are for real devices and contains handlers for their interrupts (see <a href="#int">Interrupt/Interrupt Handlers</a>).<br>
     The standard keyboard driver is responsible servicing key presses, and it also has support for the capital letter and combinational key handling.<br>
     The PIT and RTC all generates interrupts periodically.<br>
-    The PIT and PIT driver are used to handle the scheduling and can be turned off (see below). It is only accessible by the 391OS-36 kernel.<br>
+    The PIT and PIT driver are used to handle the scheduling and can be turned off (see <a href="#scheduler">Process Switching/Scheduler</a>). It is only accessible by the 391OS-36 kernel.<br>
     The RTC is user-level accessible and it is "virtualized" for each process by the RTC driver, so they all have its own instance and frenquency.<br>
     <i>Now, you see why the OS should use PIT for its task scheduling. You don't want an user program to adjust the scheduler frequency in the kernel.</i><br>
     The terminal driver is for standard input and output and works as a bridge with each terminal, keyboard driver, and system calls.<br>
-    There are three terminals (see below). The input buffer for each terminal is limited to 128-characters.<br>
+    There are three terminals (see <a href="#multerm">Background Switching/Multiterminals</a>). The input buffer for each terminal is limited to 128-characters.<br>
 </p>
 <h3 id="memaddr">Memory Addressing</h3>
 <p>
     The 391OS-36 has bypassed segmentation just like any mainstream modern operation systems. Only paging was used for the memory addressing.<br>
-    The memory layout 391OS-36 used is fixed (see below).<br>
+    The memory layout 391OS-36 used is fixed (see <a href="#pmem">Physical Memory Layout</a> and <a href="#vmem">Virtual Memory Layout</a>).<br>
 </p>
 <h3 id="pmem">Physical Memory Layout</h3>
 <p>
     From low to high, the 391OS-36 has utilized the following 32MB physical memory:<br>
     <ul>
-        <li>4MB space with five 4KB space for the VRAM for the active terminal, 3 terminal backups, and an extra backup space</li>
-        <li>4MB space for the kernel data (mostly Process Control Blocks (PCBs) and Terminal Info (TI) blocks) and kernel stack</li>
-        <li>Six 4MB spaces for user applications' binary and stack (see below)</li>
+        <li>4MB space with five 4KB space for the VRAM for the active terminal, 3 terminal backups, and an extra backup space (see <a href="#multerm">Multiterminals</a>)</li>
+        <li>4MB space for the kernel data (mostly Process Control Blocks (PCBs) and Terminal Info (TI) blocks) and kernel stack (see <a href="#proctrl">Process Control</a> and <a href="#multerm">Multiterminals</a>)</li>
+        <li>Six 4MB spaces for user applications' binary and stack (see <a href="#proctrl">Process Control</a>)</li>
     </ul>
 </p>
 <h3 id="vmem">Virtual Memory Layout</h3>
 <p>
     From low to high, the 391OS-36 has mapped the 4GB virtual memory space for each user program as following:<br>
     <ul>
-        <li>4MB managed by a superviser Page Table (PT), with five 4KB superviser pages, going through from the physical memory (see above)</li>
-        <li>4MB superviser jumbo page for the kernel, going through from the physical memory (see above)</li>
-        <li>4MB user page at address address 128MB, for the current running program only (see below)</li>
-        <li>4MB managed by a user Page Table (PT), with a 4KB vidmap page for the current active program, controlled by the vidmap system call (see below)</li>
+        <li>4MB managed by a superviser Page Table (PT), with five 4KB superviser pages, going through from the physical memory (see <a href="#pmem">Physical Memory Layout</a>)</li>
+        <li>4MB superviser jumbo page for the kernel, going through from the physical memory (see <a href="#pmem">Physical Memory Layout</a>)</li>
+        <li>4MB user page at address address 128MB, for the current running program only (see <a href="#proctrl">Process Control</a>)</li>
+        <li>4MB managed by a user PT, with a 4KB vidmap page for the current active program, controlled by the vidmap (see <a href="#syscall">System Calls</a> and <a href="#multerm">Multiterminals</a>)</li>
     </ul>
 </p>
 <h3 id="syscall">System Calls</h3>
@@ -325,11 +325,11 @@
     </tr>
     <tr>
         <td>halt</td>
-        <td>Halt the current program (process).<br>Free the PCB (see below), close the FD, tear down the vidmap and program page, and resume the parent program's PC and stack.</td>
+        <td>Halt the current program (process). For the halt procedure, see <a href="#proctrl">Process Control/Execute/Halt</a>.</td>
     </tr>
    <tr>
         <td>execute</td>
-        <td>Load and execute a new program.<br>Sanity check, create the program page, allocate a PCB, create the FD, bookkeeping, change the stack and jump to the new PC.</td>
+        <td>Load and execute a new program. For the execute procedure, see <a href="#proctrl">Process Control/Execute/Halt</a>.</td>
     </tr> 
     <tr>
         <td>read</td>
@@ -357,46 +357,52 @@
     </tr>  
     <tr>
         <td><i>set_handler</i></td>
-        <td><i>Set custom handler for a signal (see below).</i></td>
+        <td><i>Set custom handler for a signal (see <a href="#sig">Signals</a>, this is optional).</i></td>
     </tr>  
     <tr>
         <td><i>sigreturn</i></td>
-        <td><i>Restore the hardware context from the signal handler (see below).</i></td>
+        <td><i>Restore the hardware context from the signal handler (see <a href="#sig">Signals</a>, this is optional).</i></td>
     </tr>  
 </table>
 <p>
     <i>Please note that the last two system calls are for extra credit; they are not required.</i><br>
     System calls are generated deliberately by user programs by generating a "soft interrupt," INT x80 on x86 systems.<br>
-    When a system call was generated, the processor jumps to the system call assembly linkage (see above).<br>
+    When a system call was generated, the processor jumps to the system call assembly linkage (see <a href="#linkage">Context Switch/Assembly Linkages</a>).<br>
     Arguments for system calls are carried by %EAX, %EBX, %ECX, and %EDX registers.<br>
     The linkage will check if the arguments are valid, and then hand the job to the corresponding system call handler.
 </p>
-<h3 id="proctrl">Process Control</h3>
+<h3 id="proctrl">Process Control/Execute/Halt</h3>
 <p>
-    391OS-36 supports up to 6 processes. Each process holds a Process Control Block (PCB) in the kernel.<br>
+    The 391OS-36 supports up to 6 processes. In the kernel space, each process holds a kernel stack and a <b>Process Control Block (PCB)</b>.<br>
+    In the user space, each process holds their own user page (see <a href="#vmem">Virtual Memory Layout</a>) which contains the executable binary and a user stack.<br>
+    By having their own kernel and user stacks, their hardware context and user stack data won't be overwritten by other programs.<br>
+    Each PCB tracks the allocated process ID (PID), parent PID, terminal ID, kernel/user stacks, FD, <i>signals and its handlers,</i> etc.<br>
     The kernel manages the PCB allocation by a custom design called <i>PCB pool</i>.<br>
     This custom design allows the 391OS-36 to allocate and free the PCB resources freely.<br>
-    Each PCB tracks the allocated process ID (PID), parent PID, terminal ID, kernel/user stacks, FD, <i>signals and its handlers,</i> etc.<br>
-    While 6 processes are supported, only 3 are actually multitasking, and 1 at each time is running/scheduled (see below).
+    When <b>creating a new process (execute system call, see <a href="#syscall">System Calls</a>)</b>, the OS will first run a sanity check, extract the program name and argument.<br>
+    Then, it will try to allocate a PCB, create the user page and copy the binary for the program, initialize the FD, and do the bookkeeping.<br>
+    Finally, it will switch the kernel stack, build a custom hardware context with the new PC and user stack, and return to the linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
+    When <b>halting a process (halt system call, see <a href="#syscall">System Calls</a>)</b>, the OS will first free the resources, which will tear down the user page, vidmap, and purge the FD.<br>
+    Then, it will free the PCB, build the context with the parent process's information and return to the linkage. Current context will be discarded.
 </p>
-<h3 id="scheduler">Scheduler</h3>
+<h3 id="scheduler">Process Switching/Scheduler</h3>
 <p>
-    391OS-36 supports a round-robin scheduler based on the PIT interrupt (see above) that can be turned off.<br>
-    The scheduler schedules 3 processes that is shown on each terminal, called active processes, so they can multitask.<br>
+    The 391OS-36 supports a round-robin scheduler based on the PIT interrupt (see <a href="#dev">Supported Devices/Drivers</a>) that can be turned off.<br>
+    While 6 processes are supported, only 3 of them are actually multitasking, and 1 at each time is running/scheduled.<br>
+    The scheduler schedules 3 processes that is shown on each terminal, called active processes, so they are constantly switching, and thus can multitask.<br>
     But only one program is "actually" running, called running process, as there are only one processor supported.<br>
-    When switching the running program in the background, a lot of works were done. One of the big challenge is to do a switch with separate VRAM.<br>
-    The switching begins with PIT driver, with the hardware context saved. It will then switch the page, stack, and Program Counter (PC) like a halt call.<br>
-    Besides the bookkeeping and context switch, the background running process only prints to the VRAM of its terminal even it is not active.<br>
-    For 391OS-36, this is done by having 5 individual VRAM pages .<br>
+    The <b>program switching</b> begins in the kernel with the hardware context saved. It is pretty like a halt call, but it will preserve the current resources and context.<br>
+    Then, it will switch the kernel page, kernel and stack, build the context with the next scheduled process's information and return to the linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
     Turning off scheduler will disable the multitasking, but it mimics the environment for your work prior to CP5.<br>
-    In that case, program switching only happens when the user is switching the terminal in the foreground.
-    
+    In that case, program switching only happens when the user is switching the terminal in the foreground, thus limiting the multitasking features.
 </p>
-<h3 id="multerm">Multiterminals</h3>
+<h3 id="multerm">Background Switching/Multiterminals</h3>
 <p>
-    391OS-36 supports up to 3 terminals. Each terminal holds a custom design called <i>terminal info (TI) block</i> in the kernel.<br>
-    Each <i>TI block</i> tracks the PCB pointer, coordinations, RTC parameters, etc.<br>
-    When switching, 391OS-36 will backup the current VRAM, copy the corresponding VRAM to the display, and remap the vidmap if necessary.
+    The 391OS-36 supports up to 3 terminals. Each terminal holds a custom design called <i><b>terminal info (TI) block</b></i> in the kernel.<br>
+    Each <i>TI block</i> tracks the current active program, PCB pointer, coordinations, etc. Scheduler works on active programs, so it relys on these information.<br>
+    When <b>switching the running program in the background</b>, a lot of extra works were done. One of the big challenge is to do a switch with separate VRAMs.<br>
+    The background running process only prints to its terminal even it is not active. For 391OS-36, this is done by having 5 individual VRAM pages (see <a href="#pmem">Physical Memory Layout</a>).<br>
+    When <b>switching the active terminal</b>, 391OS-36 will backup the current VRAM, copy the corresponding VRAM to the display, and remap the vidmap if necessary.<br>
 </p>
 <i>
     <h3 id="sig">Signals</h3>
@@ -443,7 +449,7 @@
     <p>
         The first five signals supports a custom user-installed handler through set_handler system call.<br>
         You will need to implement the first five to be eligible to receive extra credit for the signals in your MP assignment.<br>
-        Linkage is carefully engineered to construct the stack, so signals are checked and delivered during any context switch (see above).<br>
+        Linkage is carefully engineered to construct the stack, so signals are checked and delivered during any context switch (see <a href="#linkage">Context Switch/Assembly Linkages</a>).<br>
         Signal requires a lot of bookkeeping including masks, handlers, pending signals in the PCB of each process.
     </p>
 </i>
