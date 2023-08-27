@@ -28,10 +28,10 @@
             <li><a href="#cmd">Shell Commands</a></li>
             <li><a href="#combkey">Combinational Keys</a></li>
             <li><a href="#fsdir">File System Directory</a></li>
-            <li><a href="#linkage">Traps/Assembly Linkages</a></li>
-            <li><a href="#exception">Exception Handlers</a></li>
-            <li><a href="#int">Interrupt Handlers</a></li>
-            <li><a href="#dev">Supported Devices</a></li>
+            <li><a href="#linkage">Context Switch/Assembly Linkages</a></li>
+            <li><a href="#exception">Exception/Exception Handlers</a></li>
+            <li><a href="#int">Interrupt/Interrupt Handlers</a></li>
+            <li><a href="#dev">Supported Devices/Drivers</a></li>
             <li><a href="#memaddr">Memory Addressing</a></li>
             <li><a href="#pmem">Physical Memory Layout</a></li>
             <li><a href="#vmem">Virtual Memory Layout</a></li>
@@ -39,15 +39,15 @@
             <li><a href="#fsabst">File System Abstraction</a></li>
             <li><a href="#syscall">System Calls</a></li>
             <li><a href="#proctrl">Process Control</a></li>
-            <li><a href="#multerm">Multiterminals</a></li>
             <li><a href="#scheduler">Scheduler</a></li>
+            <li><a href="#multerm">Multiterminals</a></li>
             <li><a href="#sig">Signals</a></li>
             <li><a href="#pmgr">Process Manager</a></li>
         </ul>
     </p>
 </div>
 <p>
-    <b>Note:</b> All <i>italic</i> words in this document are for extra credits or design specific and not required for your MP3.<br>
+    <b>Note:</b> All <i>italic</i> words in this document are for extra credits or design specific, and are not required for your work.<br>
 </p>
 <h3 id="cmd">Shell Commands</h3>
 <table border="2" cellpadding="5">
@@ -57,11 +57,11 @@
     </tr>
     <tr>
         <td>exit</td>
-        <td>Quit the current 391OS-36 Shell program.<br>Will try to restart if the last shell in the current terminal is terminated.</td>
+        <td>Quit the current 391OS-36 Shell program.<br>Will try to restart if the last shell in the current terminal was terminated.</td>
     </tr>
     <tr>
         <td>[Executable] [Arg]</td>
-        <td>Search and open the program in the current terminal.<br>Some program may require arguments (see below).</td>
+        <td>Search and open the program in the current terminal.<br>Some program may require additional arguments (see below).</td>
     </tr>
 </table>
 <h3 id="combkey">Combinational Keys</h3>
@@ -94,7 +94,7 @@
     <tr>
         <td>Ctrl+L</td>
         <td>Clear Screen</td>
-        <td>Clear the VRAM and reset the cursor.</td>
+        <td>Clear the VRAM and reset the cursor position.</td>
     </tr>  
     <tr>
         <td><i>Ctrl+S</i></td>
@@ -104,7 +104,7 @@
     <tr>
         <td><i>Ctrl+V</i></td>
         <td><i>Enable/Disable Verbose Mode</i></td>
-        <td><i>Print verbose outputs (signal, execute, halt).</i></td>
+        <td><i>Print the verbose outputs (for debug only).</i></td>
     </tr>  
     <tr>
         <td><i>Ctrl+P</i></td>
@@ -114,7 +114,7 @@
     <tr>
         <td><i>Ctrl+H</i></td>
         <td><i>Start 391OS-36 Help Center</i></td>
-        <td><i>Show combination keys and about info</i></td>
+        <td><i>Show the combination keys and about info</i></td>
     </tr>   
 </table>
 <h3 id="fsdir">File System Directory</h3>
@@ -127,38 +127,38 @@
     <tr>
         <td>.</td>
         <td>Directory</td>
-        <td>Holds information and refers to the directory itself.</td>
+        <td>Holds the information and refers to the root directory itself.</td>
     </tr>
    <tr>
         <td>sigtest</td>
         <td>Executable</td>
-        <td>Argument: 0 or any. Used to test signals.<br>Use arg 0 to generate a PF without handler installed.<br>
-            <i>Use any arg except 0 to install handlers for alarm and segfault, and generate a PF.</i></td>
+        <td><b>Argument: 0 or any.</b> Used to test signals.<br>Use argument "0" to generate a Page Fault (PF) without trying to install a handler.<br>
+            <i>Use any argument except "0" to install handlers for alarm and segfault, and then generate a PF.</i></td>
     </tr> 
     <tr>
         <td>shell</td>
         <td>Executable</td>
-        <td>391OS-36 shell. The underlying program running in each terminal.</td>
+        <td>391OS shell, the underlying program running in each terminal.</td>
     </tr>
     <tr>
         <td>grep</td>
         <td>Executable</td>
-        <td>Argument: a pattern. Prints lines that contain a match for the pattern.</td>
+        <td><b>Argument: a pattern.</b> Prints lines that contain a match for the pattern in each files' contents.</td>
     </tr>  
     <tr>
         <td>syserr</td>
         <td>Executable</td>
-        <td>Used to test illegal user program arguments.</td>
+        <td>Used to test illegal systemcall arguments.</td>
     </tr>  
     <tr>
         <td>rtc</td>
         <td>Device</td>
-        <td>Giving user-level access to the real-time clock (RTC).</td>
+        <td>Giving user-level access to the Real-Time Clock (RTC).</td>
     </tr>  
     <tr>
         <td>fish</td>
         <td>Executable</td>
-        <td>Used to test vidmap and RTC. Display a fish animation in the current terminal.</td>
+        <td>Used to test the vidmap systemcall and RTC. Display a fish animation on the current terminal.</td>
     </tr>  
     <tr>
         <td>counter</td>
@@ -168,33 +168,33 @@
     <tr>
         <td>pingpong</td>
         <td>Executable</td>
-        <td>Used to test RTC. Infiniately print a ping-pong animation in the current terminal.<br>
-            Can only be terminated by Ctrl+C or Process Manager.</td>
+        <td>Used to test RTC. Infiniately print a ping-pong animation on the current terminal.<br>
+            Can only be terminated by Ctrl+C (interrupt signal) or the Process Manager.</td>
     </tr>  
     <tr>
         <td>cat</td>
         <td>Executable</td>
-        <td>Argument: a file name. Try to open and read the content of a file/directory/device.</td>
+        <td><b>Argument: a file name.</b> Try to open and read the content of a file (or directory/device).</td>
     </tr>  
     <tr>
         <td>frame0.txt</td>
         <td>Regular File</td>
-        <td>A frame of fish animation.</td>
+        <td>A frame of the fish animation.</td>
     </tr>  
     <tr>
         <td>verylarge~.txt</td>
         <td>Regular File</td>
-        <td>Used to test very long file name handling.</td>
+        <td>Used to test the very long file name handling of the terminal driver.</td>
     </tr>  
     <tr>
         <td>ls</td>
         <td>Executable</td>
-        <td>List the directory.</td>
+        <td>List all files in the directory.</td>
     </tr>  
     <tr>
         <td>testprint</td>
         <td>Executable</td>
-        <td>Used to test the terminal driver.</td>
+        <td>Used to test the standard printing of the terminal driver.</td>
     </tr>  
     <tr>
         <td>created.txt</td>
@@ -204,74 +204,118 @@
     <tr>
         <td>frame1.txt</td>
         <td>Regular File</td>
-        <td>Another frame of fish animation.</td>
+        <td>Another frame of the fish animation.</td>
     </tr>  
     <tr>
         <td>hello</td>
         <td>Executable</td>
-        <td>Used to test the terminal driver (input buffer).</td>
+        <td>Used to test the input buffer of the terminal driver.</td>
     </tr>  
 </table>
-<h3 id="linkage">Assembly Linkages</h3>
 <p>
-    Whenever there is a trap, processor jumps to the assmebly linkage from the IDT.<br>
+    Unless specifically listed above, programs usually don't accept any argument.<br>
+    The contents of the file system were provided by the ECE 391 staff.
+</p>
+<h3 id="linkage">Context Switch/Assembly Linkages</h3>
+<p>
+    Whenever an interruption, exception, or system call happened, the processor jumps to a specific assmebly linkage from the IDT.<br>
+    This procedure is sometimes called a <b>"context switch"</b>. It is almost constantly happening with the scheduler enabled, as the OS schedules the next program.<br>
     Assembly linkages for interruption, exception, and system calls are different, but they all construct a hardware context for furture restoring or usage.<br>
-    They will also push/pass through arguments accordingly, and call the corresponding handlers.<br>
-    <i>When going back to the user space, it also dispatches any pending signal (see below).</i>
+    They will also push/pass through arguments accordingly, and call the corresponding handlers (see below).<br>
+    When returning back from the handler, assembly linkage will resume the hardware context saved before by IRET.<br>
+    Or, halt/execute/process switch (see below) constructs a custom context, then it will jump to a new or background program's Prgram Counter (PC) and stack.<br>
+    <i>When going back to the user space, it will also dispatches any pending signal (see below, optional).</i><br>
+    <i>Now, you see the reason why context switch is <b>expensive</b>. The assembly linkage really needs to deal with a lot of stuff.</i>
 </p>
-<h3 id="exception">Exception Handlers</h3>
+<h3 id="exception">Exception/Exception Handlers</h3>
 <p>
-    Linkage pushes information and calls an unified exception handler.<br>
-    <i>Then, the handler will send a signal to the process for further handling.</i>
+    An exception happens when the user program did something wild, such as dividing by zero or accessing illegal pages (see below).<br>
+    Exceptions are synchronised. When an exception was generated, the processor jumps to the specific assembly linkage (see ablve).<br>
+    The exception assembly linkage pushes information and calls an unified exception handler.<br>
+    Then, the handler will display the error message, debug information, and <i>send a signal to the process for further handling (see below)</i>.<br>
+    If you did not implement the signal or no handler was installed, the default behavior is usually killing the offending program.
 </p>
-<h3 id="int">Interrupt Handlers</h3>
+<h3 id="int">Interrupt/Interrupt Handlers</h3>
 <p>
-    Linkage pushes information and calls an unified interrupt handler.<br>
-    Then the handler will dispatch to the corresponding drivers.<br>
+    An interrupt happens when a piece of hardware needs processor's attention, such as keyboard input, RTC, and PIC.<br>
+    391OS-36 only contains essential drivers (see below). Interrupt lines (IRQs) from non-supported hardware are masked and ignored.<br>
     The IRQ lines are managed by two i8259 PICs just like any other classic IBM-compatible PC.<br>
+    Interrupts are non-synchronised. When an interrupt is raised and got processor's attention, it jumps to the specific assembly linkage (see above).<br>
+    The interrupt assmebly linkage pushes information and calls an unified interrupt handler.<br>
+    Then, the handler will call the corresponding driver, and the driver will handle the remaining work (again, see below).
 </p>
-<h3 id="dev">Supported Devices</h3>
+<table border="2" cellpadding="5">
+    <tr>
+        <th bgcolor="#ccffff">Type</th>
+        <th bgcolor="#ccffff">Generated By</th>
+        <th bgcolor="#ccffff">Asynchronous</th>
+        <th bgcolor="#ccffff">Unexpected</th>
+    </tr>
+    <tr>
+        <td>Interrupts</td>
+        <td>External device needs attention</td>
+        <td>YES</td>
+        <td>YES</td>
+    </tr>
+   <tr>
+        <td>Exceptions</td>
+        <td>User program behaving wildly</td>
+        <td>NO</td>
+        <td>YES</td>
+    </tr> 
+    <tr>
+        <td>System Calls (see below)</td>
+        <td>User program, deliberately via INT x80</td>
+        <td>NO</td>
+        <td>NO</td>
+    </tr> 
+</table>
+<h3 id="dev">Supported Devices/Drivers</h3>
 <p>
-    391OS-36 has drivers for the standard keyboard, programmable interval timer (PIT), real-time clock (RTC), and terminal.<br>
-    The standard keyboard driver adds support for capital letter handling and combinational keys.<br>
-    The PIT driver is used to handle the scheduling and can be turned off (see below).<br>
-    The RTC driver supports frenquency adjusting and is "virtualized," so each process has its own RTC instance (see below).<br>
-    The terminal driver is for standard input and output and works with keyboard driver. The input buffer is limited at 128-characters.<br>
+    The 391OS-36 has drivers for the standard keyboard, Programmable Interval Timer (PIT), Real-Time Clock (RTC), and terminal.<br>
+    Keyboard, PIT, and RTC drivers are for real devices and contains handlers for their interruptions (see above).<br>
+    The standard keyboard driver is responsible servicing key presses, and it also has support for the capital letter and combinational key handling.<br>
+    The PIT and RTC all generates interrupts periodically.<br>
+    The PIT and PIT driver are used to handle the scheduling and can be turned off (see below). It is only accessible by the 391OS-36 kernel.<br>
+    The RTC is user-level accessible and it is "virtualized" for each process by the RTC driver, so they all have its own instance and frenquency.<br>
+    <i>Now, you see why the OS should use PIT for its task scheduling. You don't want an user program to adjust the scheduler frequency in the kernel.</i><br>
+    The terminal driver is for standard input and output and works as a bridge with each terminal, keyboard driver, and system calls.<br>
+    There are three terminals (see below). The input buffer for each terminal is limited to 128-characters.<br>
 </p>
 <h3 id="memaddr">Memory Addressing</h3>
 <p>
-    391OS-36 bypassed segmentation just like any modern operation systems, only paging was used for memory addressing.<br>
-    The memory layout is fixed (see below).<br>
+    The 391OS-36 has bypassed segmentation just like any mainstream modern operation systems. Only paging was used for the memory addressing.<br>
+    The memory layout 391OS-36 used is fixed (see below).<br>
 </p>
 <h3 id="pmem">Physical Memory Layout</h3>
 <p>
-    From low to high, 391OS-36 utilized 32MB of physical memory:<br>
+    From low to high, the 391OS-36 has utilized the following 32MB physical memory:<br>
     <ul>
-        <li>4MB space with several 4KB space for the VRAM</li>
-        <li>4MB space for kernel data and stacks</li>
-        <li>Several 4MB spaces for user applications</li>
+        <li>4MB space with five 4KB space for the VRAM for the active terminal, 3 terminal backups, and an extra backup space</li>
+        <li>4MB space for the kernel data (mostly Process Control Blocks (PCBs) and Terminal Info (TI) blocks) and kernel stack</li>
+        <li>Six 4MB spaces for user applications' binary and stack (see below)</li>
     </ul>
 </p>
 <h3 id="vmem">Virtual Memory Layout</h3>
 <p>
-    From low to high, 391OS-36 utilized the following in the 4GB virtual memory space:<br>
+    From low to high, the 391OS-36 has mapped the 4GB virtual memory space for each user program as following:<br>
     <ul>
-        <li>4MB PT with several 4KB global superviser pages for the VRAM</li>
-        <li>4MB global superviser page for the kernel</li>
-        <li>4MB user page at 128MB for the current scheduled process</li>
-        <li>4KB user page for the vidmap</li>
+        <li>4MB managed by a superviser Page Table (PT), with five 4KB superviser pages, going through from the physical memory (see above)</li>
+        <li>4MB superviser jumbo page for the kernel, going through from the physical memory (see above)</li>
+        <li>4MB user page at address address 128MB, for the current running program only (see below)</li>
+        <li>4MB managed by a user Page Table (PT), with a 4KB vidmap page for the current active program, controlled by the vidmap system call (see below)</li>
     </ul>
 </p>
 <h3 id="fs">File System</h3>
 <p>
-    The 391OS-36 FS has a total size of 8MB, and is divided into 4KB blocks of one boot block, inodes, and data blocks.<br>
+    The 391OS-36 File System has a total size of 8MB, and is divided into 4KB blocks of one boot block, several inodes, and data blocks.<br>
     Each boot block can track up to 62 inodes and one root directory, and each inode can track up to 1023 data blocks.<br>
-    The limitations are up to 62 files of 4092KB size and 32 characters name length. Also, it does not support hierarchy and is read-only.<br>
+    Thus, the limitations are up to 62 files of 4092KB size and 32 characters name length. Also, it does not support hierarchy and is read-only.
 </p>
 <h3 id="fsabst">File System Abstraction</h3>
 <p>
-    391OS-36 treat any files, device (RTC), and directory as files. Each process has a dynamic file descriptor (FD) that supports 8 open files.<br>
-    According to the file type, each entry tracks inode, position, flags, and an operation jump table, and is utilized by syscalls (see below).<br>
+    The 391OS-36 treat any files, device (RTC), and directory as files (see above). Each process has a dynamic File Descriptor (FD) that supports 8 open files.<br>
+    Each FD entry tracks inode, position, flags, and an operation jump table, according to the file type. They are directly utilized by system calls (see below).<br>
 </p>
 <h3 id="syscall">System Calls</h3>
 <table border="2" cellpadding="5">
@@ -281,11 +325,11 @@
     </tr>
     <tr>
         <td>halt</td>
-        <td>Halt the current program (process).</td>
+        <td>Halt the current program (process).<br>Free the PCB (see below), close the FD, tear down the vidmap and program page, and resume the parent program's PC and stack.</td>
     </tr>
    <tr>
         <td>execute</td>
-        <td>Load and execute a new program.</td>
+        <td>Load and execute a new program.<br>Sanity check, create the program page, allocate a PCB, create the FD, bookkeeping, change the stack and jump to the new PC.</td>
     </tr> 
     <tr>
         <td>read</td>
@@ -297,7 +341,7 @@
     </tr>  
     <tr>
         <td>open</td>
-        <td>Allocate FD entry and open a file.</td>
+        <td>Allocate a FD entry and open a file.</td>
     </tr>  
     <tr>
         <td>close</td>
@@ -305,43 +349,54 @@
     </tr>  
     <tr>
         <td>getargs</td>
-        <td>Read the command line argument from shell.</td>
+        <td>Return the command line argument. It is extracted during the execute system call.</td>
     </tr>  
     <tr>
         <td>vidmap</td>
-        <td>Giving user-level access to the VRAM and map it to the user space.</td>
+        <td>Giving the user-level access to the current VRAM by mapping it to the vidmap page, which is user-level accessible.</td>
     </tr>  
     <tr>
         <td><i>set_handler</i></td>
-        <td><i>Set custom handler for signal (see below).</i></td>
+        <td><i>Set custom handler for a signal (see below).</i></td>
     </tr>  
     <tr>
         <td><i>sigreturn</i></td>
-        <td><i>Restore the hardware context from signal handler (see below).</i></td>
+        <td><i>Restore the hardware context from the signal handler (see below).</i></td>
     </tr>  
 </table>
 <p>
     <i>Please note that the last two system calls are for extra credit; they are not required.</i><br>
-    These system calls are handled accordingly in kernel from linkage.<br>
+    System calls are generated deliberately by user programs by generating a "soft interrupt," INT x80 on x86 systems.<br>
+    When a system call was generated, the processor jumps to the system call assembly linkage (see above).<br>
+    Arguments for system calls are carried by %EAX, %EBX, %ECX, and %EDX registers.<br>
+    The linkage will check if the arguments are valid, and then hand the job to the corresponding system call handler.
 </p>
 <h3 id="proctrl">Process Control</h3>
 <p>
-    391OS-36 supports up to 6 processes. Each process holds a process control block (PCB) in the kernel.<br>
+    391OS-36 supports up to 6 processes. Each process holds a Process Control Block (PCB) in the kernel.<br>
     The kernel manages the PCB allocation by a custom design called <i>PCB pool</i>.<br>
-    Each PCB tracks the allocated process ID (PID), parent PID, terminal ID, kernel/user stacks, FD, etc.<br>
+    This custom design allows the 391OS-36 to allocate and free the PCB resources freely.<br>
+    Each PCB tracks the allocated process ID (PID), parent PID, terminal ID, kernel/user stacks, FD, <i>signals and its handlers,</i> etc.<br>
+    While 6 processes are supported, only 3 are actually multitasking, and 1 at each time is running/scheduled (see below).
+</p>
+<h3 id="scheduler">Scheduler</h3>
+<p>
+    391OS-36 supports a round-robin scheduler based on the PIT interrupt (see above) that can be turned off.<br>
+    The scheduler schedules 3 processes that is shown on each terminal, called active processes, so they can multitask.<br>
+    But only one program is "actually" running, called running process, as there are only one processor supported.<br>
+    When switching the running program in the background, a lot of works were done. One of the big challenge is to do a switch with separate VRAM.<br>
+    The switching begins with PIT driver, with the hardware context saved. It will then switch the page, stack, and Program Counter (PC) like a halt call.<br>
+    Besides the bookkeeping and context switch, the background running process only prints to the VRAM of its terminal even it is not active.<br>
+    For 391OS-36, this is done by having 5 individual VRAM pages .<br>
+    Turning off scheduler will disable the multitasking, but it mimics the environment for your work prior to CP5.<br>
+    In that case, program switching only happens when the user is switching the terminal in the foreground.
+    
 </p>
 <h3 id="multerm">Multiterminals</h3>
 <p>
     391OS-36 supports up to 3 terminals. Each terminal holds a custom design called <i>terminal info (TI) block</i> in the kernel.<br>
     Each <i>TI block</i> tracks the PCB pointer, coordinations, RTC parameters, etc.<br>
-</p>
-<h3 id="scheduler">Scheduler</h3>
-<p>
-    391OS-36 supports a round-robin scheduler that can be turned off and a virtualized RTC for each process.<br>
-    The scheduler schedules 3 processes that is shown on each terminal, called active processes, so they can multitask.<br>
-    But only one process is "actually" running, called running process.<br>
-    Turning off scheduler will disable the multitasking, but it mimics the environment for your work prior to CP5.<br>
-    
+    When switching, 391OS-36 will backup the current VRAM, copy the corresponding VRAM to the display, and remap the vidmap if necessary.
 </p>
 <i>
     <h3 id="sig">Signals</h3>
@@ -388,13 +443,14 @@
     <p>
         The first five signals supports a custom user-installed handler through set_handler system call.<br>
         You will need to implement the first five to be eligible to receive extra credit for the signals in your MP assignment.<br>
-        Linkage is carefully engineered to construct the stack, so signals are checked and delivered during any context switch (see above).
+        Linkage is carefully engineered to construct the stack, so signals are checked and delivered during any context switch (see above).<br>
+        Signal requires a lot of bookkeeping including masks, handlers, pending signals in the PCB of each process.
     </p>
 </i>
 <i>
     <h3 id="pmgr">Process Manager</h3>
     <p>
-        391OS-36 Process Manager is a kernel utility that prints the current PCB Pool and TI block information:<br>
+        The 391OS-36 Process Manager is a kernel utility that prints the current PCB Pool and TI block information:<br>
         <ul>
             <li>PID, the Process ID</li>
             <li>TID, the Terminal ID</li>
@@ -404,10 +460,10 @@
             <li>ECHO, the echo flag</li>
             <li>VMAP, the vidmap flag</li>
             <li>COOR, the cursor coordination</li>
-            <li>... and also, the (active, for terminal) program name</li>
+            <li>... and also, the (active, for each terminal) program name</li>
         </ul>
         It is design specific to 391OS-36, so it is definiately not required.<br>
-        Please note this utility's kill function does not work the scheduler (please check other known issues in the demo page).<br>
+        Please note this utility's kill function does not work with the scheduler (please check other known issues in the demo page).<br>
     </p>
 </i>
 <hr>

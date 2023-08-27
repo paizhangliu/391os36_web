@@ -99,29 +99,39 @@
         <b><a href="JavaScript:popUp();">Open in a Popup Window</a></b>
     </p>
 </div>
-<div id="known_issue">
-    <h3>Known Issues</h3>
-    <p>
-        <i>Last updated on Apr. 17, 2023</i>
-        <ul>
-            <li><b><i>cat . (root file system)</i> does not work as intended as required in the MP assignment.</b></li>
-            <li><i>"Kill the process" function in Process Manager (not required)</i> does not work with the scheduler.</li>
-        </ul>
-    </p>
-</div>
 <h3>Introduction</h3>
 <p>
     <b>391OS-36 is a x86 multitask OS built from scratch.</b> It features:<br>
     <ul>
         <li>A custom file system</li>
         <li>Essential drivers and system calls</li>
-        <li>Up to six user applications running in three terminals</li>
-        <li>Scheduler, VRTC, and signals support</li>
+        <li>A scheduler, supports 6 user programs running in 3 terminals</li>
+        <li>Virtual memory, virtualized RTCs, and signals for each user program</li>
     </ul>
 </p>
 <h3>Office Hours</h3>
 <p>
-    I am hosting office hours for ECE 391 in Spring 2023.<br>
-    If you ever need help please come by 19-22 W or 18-22 F in ECEB 3026.<br>
+    <p>
+        <b>I am hosting office hours <i>again</i> for ECE 391 in Fall 2023.</b><br>
+        <b>If you ever need help, please come to ECEB 3026 on 16-20 Th or 13-16 Fri.</b><br>
+    </p>
+    <p>
+        <del>I am hosting office hours for ECE 391 in Spring 2023.</del><br>
+        <del>If you ever need help, please come to ECEB 3026 on 19-22 W or 18-22 F.</del><br>
+    </p>
 </p>
+<div id="known_issue">
+    <h3>Known Issues</h3>
+    <p>
+        <ul>
+            <li><b><i>cat . (root file system)</i> does not work expectedly per the requirements in the MP assignment.</b></li>
+            <ul>
+                <li>Your work should display a list of files (please check the MP documentation). Please do not follow the wrong behavior.
+            </ul>
+            <li>A page fault exception may occur when initializing paging during boot up. This only occurs occasionally in the web emulator.</li>
+            <li>"Kill the process" function in Process Manager (a custom design, not required) is not compatible with the scheduler.</li>
+            <li>The web emulator is not compatible with IDM. Please add os.paizhang.info to the IDM exception list or manually cancel the downloads.</li>
+        </ul>
+    </p>
+</div>
 <hr>
