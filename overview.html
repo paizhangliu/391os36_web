@@ -27,6 +27,8 @@
         <ul id="toc_list">
             <li><a href="#cmd">Shell Commands</a></li>
             <li><a href="#combkey">Combinational Keys</a></li>
+            <li><a href="#fs">File System</a></li>
+            <li><a href="#fsabst">File System Abstraction</a></li>
             <li><a href="#fsdir">File System Directory</a></li>
             <li><a href="#linkage">Context Switch/Assembly Linkages</a></li>
             <li><a href="#exception">Exception/Exception Handlers</a></li>
@@ -35,8 +37,6 @@
             <li><a href="#memaddr">Memory Addressing</a></li>
             <li><a href="#pmem">Physical Memory Layout</a></li>
             <li><a href="#vmem">Virtual Memory Layout</a></li>
-            <li><a href="#fs">File System</a></li>
-            <li><a href="#fsabst">File System Abstraction</a></li>
             <li><a href="#syscall">System Calls</a></li>
             <li><a href="#proctrl">Process Control</a></li>
             <li><a href="#scheduler">Scheduler</a></li>
@@ -117,6 +117,17 @@
         <td><i>Show the combination keys and about info</i></td>
     </tr>   
 </table>
+<h3 id="fs">File System</h3>
+<p>
+    The 391OS-36 File System has a total size of 8MB, and is divided into 4KB blocks of one boot block, several inodes, and data blocks.<br>
+    Each boot block can track up to 62 inodes and one root directory, and each inode can track up to 1023 data blocks.<br>
+    Thus, the limitations are up to 62 files of 4092KB size and 32 characters name length. Also, it does not support hierarchy and is read-only.
+</p>
+<h3 id="fsabst">File System Abstraction</h3>
+<p>
+    The 391OS-36 treat any files, device (RTC), and directory as files (see above). Each process has a dynamic File Descriptor (FD) that supports 8 open files.<br>
+    Each FD entry tracks inode, position, flags, and an operation jump table, according to the file type. They are directly utilized by system calls (see below).<br>
+</p>
 <h3 id="fsdir">File System Directory</h3>
 <table border="2" cellpadding="5">
     <tr>
@@ -148,7 +159,7 @@
     <tr>
         <td>syserr</td>
         <td>Executable</td>
-        <td>Used to test illegal systemcall arguments.</td>
+        <td>Used to test illegal system call arguments.</td>
     </tr>  
     <tr>
         <td>rtc</td>
@@ -158,7 +169,7 @@
     <tr>
         <td>fish</td>
         <td>Executable</td>
-        <td>Used to test the vidmap systemcall and RTC. Display a fish animation on the current terminal.</td>
+        <td>Used to test the vidmap system call and RTC. Display a fish animation on the current terminal.</td>
     </tr>  
     <tr>
         <td>counter</td>
@@ -305,17 +316,6 @@
         <li>4MB user page at address address 128MB, for the current running program only (see below)</li>
         <li>4MB managed by a user Page Table (PT), with a 4KB vidmap page for the current active program, controlled by the vidmap system call (see below)</li>
     </ul>
-</p>
-<h3 id="fs">File System</h3>
-<p>
-    The 391OS-36 File System has a total size of 8MB, and is divided into 4KB blocks of one boot block, several inodes, and data blocks.<br>
-    Each boot block can track up to 62 inodes and one root directory, and each inode can track up to 1023 data blocks.<br>
-    Thus, the limitations are up to 62 files of 4092KB size and 32 characters name length. Also, it does not support hierarchy and is read-only.
-</p>
-<h3 id="fsabst">File System Abstraction</h3>
-<p>
-    The 391OS-36 treat any files, device (RTC), and directory as files (see above). Each process has a dynamic File Descriptor (FD) that supports 8 open files.<br>
-    Each FD entry tracks inode, position, flags, and an operation jump table, according to the file type. They are directly utilized by system calls (see below).<br>
 </p>
 <h3 id="syscall">System Calls</h3>
 <table border="2" cellpadding="5">
