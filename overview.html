@@ -230,30 +230,13 @@
 <h3 id="linkage">Context Switch/Assembly Linkages</h3>
 <p>
     Whenever an interruption, exception, or system call happened, the processor jumps to a specific assmebly linkage in the kernel space.<br>
-    This procedure is sometimes called a <b>"context switch"</b>. It is almost constantly happening with the scheduler enabled, as the OS schedules the next program.<br>
+    This procedure is sometimes called a <b>"context switch"</b>. It is almost constantly happening with the scheduler enabled, as it is based on PIT interrupts.<br>
     Assembly linkages for interruption, exception, and system calls are different, but they all construct a hardware context on the kernel stack for restoring or usage.<br>
     They will also push/pass through arguments accordingly, and call the corresponding handlers (see <a href="#exception">Exception Handlers</a>, <a href="#int">Interrupt Handlers</a>, and <a href="#syscall">System Calls</a>).<br>
     When returning back from the handler, assembly linkage will resume the hardware context saved before by IRET, then go back to the user space.<br>
     Or, halt/execute/process switch (see <a href="#proctrl">Execute/Halt</a> and <a href="#scheduler">Switch</a>) constructs a custom context, then it will jump to the next program's Prgram Counter (PC) and stack.<br>
     <i>When going back to the user space, it will also dispatches any pending signal (see <a href="#sig">Signals</a>, this is optional).</i><br>
     <i>Now, you see the reason why context switch is <b>expensive</b>. The assembly linkage really needs to deal with a lot of stuff.</i>
-</p>
-<h3 id="exception">Exception/Exception Handlers</h3>
-<p>
-    An exception happens when the user program did something wild, such as dividing by zero or accessing illegal pages.<br>
-    Exceptions are synchronised. When an exception was generated, the processor jumps to the specific assembly linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
-    The exception assembly linkage pushes information and calls an unified exception handler.<br>
-    Then, the handler will display the error message, debug information, and <i>send a signal to the process for further handling (see <a href="#sig">Signals</a>, this is optional)</i>.<br>
-    If you did not implement the signal or no handler was installed, the default behavior is usually killing/halting the offending program.
-</p>
-<h3 id="int">Interrupt/Interrupt Handlers</h3>
-<p>
-    An interrupt happens when a piece of hardware needs processor's attention, such as keyboard input, RTC, and PIC.<br>
-    The 391OS-36 only contains essential drivers (see <a href="#dev">Supported Devices/Drivers</a>). Interrupt lines (IRQs) from non-supported hardware are masked and ignored.<br>
-    The IRQ lines are managed by two i8259 PICs just like any other mainstream IBM-compatible PC.<br>
-    Interrupts are non-synchronised. When an interrupt is raised and got processor's attention, it jumps to the specific assembly linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
-    The interrupt assmebly linkage pushes information and calls an unified interrupt handler.<br>
-    Then, the handler will call the corresponding driver, and the driver will handle the remaining work (again, see <a href="#dev">Supported Devices/Drivers</a>).
 </p>
 <table border="2" cellpadding="5">
     <tr>
@@ -270,7 +253,7 @@
     </tr>
    <tr>
         <td>Exceptions</td>
-        <td>User program behaving wildly</td>
+        <td>Kernel/user program behaving wildly</td>
         <td>NO</td>
         <td>YES</td>
     </tr> 
@@ -281,6 +264,24 @@
         <td>NO</td>
     </tr> 
 </table>
+<h3 id="exception">Exception/Exception Handlers</h3>
+<p>
+    An exception happens when the user program (or even worse, kernel) did something wild, such as dividing by zero or accessing illegal pages.<br>
+    Exceptions are synchronised. When an exception was generated, the processor jumps to the specific assembly linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
+    The exception assembly linkage pushes information and calls an unified exception handler.<br>
+    Then, the handler will display the error message, debug information, and <i>send a signal to the process if recoverable (see <a href="#sig">Signals</a>, this is optional)</i>.<br>
+    If no handler was installed, the default behavior is killing the offending program. The 391OS-36 is still alive.<br>
+    If an exception is detected in kernel mode, the exception is non-recoverable and 391OS-36 will halt. You will need to reset the emulator.
+</p>
+<h3 id="int">Interrupt/Interrupt Handlers</h3>
+<p>
+    An interrupt happens when a piece of hardware needs processor's attention, such as keyboard input, RTC, and PIC.<br>
+    The 391OS-36 only contains essential drivers (see <a href="#dev">Supported Devices/Drivers</a>). Interrupt lines (IRQs) from non-supported hardware are masked and ignored.<br>
+    The IRQ lines are managed by two i8259 PICs just like any other mainstream IBM-compatible PC.<br>
+    Interrupts are non-synchronised. When an interrupt is raised and got processor's attention, it jumps to the specific assembly linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
+    The interrupt assmebly linkage pushes information and calls an unified interrupt handler.<br>
+    Then, the handler will call the corresponding driver, and the driver will handle the remaining work (again, see <a href="#dev">Supported Devices/Drivers</a>).
+</p>
 <h3 id="dev">Supported Devices/Drivers</h3>
 <p>
     The 391OS-36 has drivers for the standard keyboard, Programmable Interval Timer (PIT), Real-Time Clock (RTC), and terminal.<br>
@@ -289,7 +290,7 @@
     The PIT and RTC all generates interrupts periodically.<br>
     The PIT and PIT driver are used to handle the scheduling and can be turned off (see <a href="#scheduler">Process Switching/Scheduler</a>). It is only accessible by the 391OS-36 kernel.<br>
     The RTC is user-level accessible and it is "virtualized" for each process by the RTC driver, so they all have its own instance and frenquency.<br>
-    <i>Now, you see why the OS should use PIT for its task scheduling. You don't want an user program to adjust the scheduler frequency in the kernel.</i><br>
+    <i>Now, you see why the OS should use PIT for its task scheduling only. You don't want an user program to tamper with the scheduler frequency.</i><br>
     The terminal driver is for standard input and output and works as a bridge with each terminal, keyboard driver, and system calls.<br>
     There are three terminals (see <a href="#multerm">Background Switching/Multiterminals</a>). The input buffer for each terminal is limited to 128-characters.<br>
 </p>
@@ -393,7 +394,7 @@
     But only one program is "actually" running, called running process, as there are only one processor supported.<br>
     The <b>program switching</b> begins in the kernel with the hardware context saved. It is pretty like a halt call, but it will preserve the current resources and context.<br>
     Then, it will switch the kernel page, kernel and stack, build the context with the next scheduled process's information and return to the linkage (see <a href="#linkage">Assembly Linkages</a>).<br>
-    Turning off scheduler will disable the multitasking, but it mimics the environment for your work prior to CP5.<br>
+    Turning off scheduler (CTRL+S) will disable the multitasking, but it mimics the environment for your work prior to CP5.<br>
     In that case, program switching only happens when the user is switching the terminal in the foreground, thus limiting the multitasking features.
 </p>
 <h3 id="multerm">Background Switching/Multiterminals</h3>
@@ -414,36 +415,43 @@
             <th bgcolor="#ccffff">Signal</th>
             <th bgcolor="#ccffff">Sender</th>
             <th bgcolor="#ccffff">Default Handler</th>
+            <th bgcolor="#ccffff">User Installable</th>
         </tr>
         <tr>
             <td>DIV_ZERO</td>
-            <td>Exception Handler</td>
+            <td>Kernel Exception Handler</td>
             <td>Kill the process.</td>
+            <td>YES</td>
         </tr>
        <tr>
             <td>SEGFAULT</td>
-            <td>Exception Handler</td>
+            <td>Kernel Exception Handler</td>
             <td>Kill the process.</td>
+            <td>YES</td>
         </tr> 
         <tr>
             <td>INTERRUPT</td>
-            <td>Keyboard Driver</td>
+            <td>Kernel Keyboard Driver (CTRL+C)</td>
             <td>Kill the process.</td>
+            <td>YES</td>
         </tr>
         <tr>
             <td>ALARM</td>
-            <td>RTC Driver</td>
+            <td>Kernel RTC Driver</td>
             <td>Ignored.</td>
+            <td>YES</td>
         </tr>  
         <tr>
             <td>USER1</td>
             <td>N/A</td>
             <td>Ignored.</td>
+            <td>YES</td>
         </tr>  
         <tr>
             <td>SYSKILL</td>
-            <td>Kernel</td>
-            <td>Not user-installable, always kill the process.</td>
+            <td>Kernel Utilities</td>
+            <td>Kill the process.</td>
+            <td>NO</td>
         </tr>   
     </table>
     <p>
@@ -454,7 +462,7 @@
     </p>
 </i>
 <i>
-    <h3 id="pmgr">Process Manager</h3>
+    <h3 id="pmgr">Process Manager (CTRL+P)</h3>
     <p>
         The 391OS-36 Process Manager is a kernel utility that prints the current PCB Pool and TI block information:<br>
         <ul>
